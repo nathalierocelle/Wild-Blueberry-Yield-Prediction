@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 import joblib
 from xgboost import XGBRegressor
-from prediction import get_prediction, encode_value
+from prediction import get_prediction
 from PIL import Image
 
 
@@ -35,7 +35,8 @@ def main():
         submit = st.button("Predict")
 
     if submit:
-        data = np.array([clonesize, honeybee,  ]).reshape(1,-1)
+        data = np.array([clonesize, honeybee,bumbles,andrena,osmia,AverageOfLowerTRange,AverageRainingDays,
+                        fruitset,fruitmass,seeds]).reshape(1,-1)
         #st.write(data)
         pred = get_prediction(data=data, model=model)
         st.write(f"The predicted wild berry yield is:  {pred[0]} 🫐")
