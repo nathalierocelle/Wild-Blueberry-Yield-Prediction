@@ -18,11 +18,11 @@ features = ['clonesize', 'honeybee', 'bumbles', 'andrena', 'osmia','AverageOfLow
 
 def main():
     
-  #  st.sidebar.markdown("<h2>About the app</h2>", unsafe_allow_html=True)
-  #  st.sidebar.write("""
-  #  This app will predict the crop yield of wild berries given the characteristics and the weather data for the
-  #  location of the building.
-  #  """)
+    st.sidebar.markdown("<h2>About the app</h2>", unsafe_allow_html=True)
+    st.sidebar.write("""
+            This app will predict the crop yield of the wild berries given various factors, 
+            including plant spatial arrangement, bee species compositions, weather conditions of the wild blueberry field.
+             """)
     
     with st.form('prediction_form'):
         
