@@ -17,29 +17,43 @@ features = ['clonesize', 'honeybee', 'bumbles', 'andrena', 'osmia','AverageOfLow
             'AverageRainingDays', 'fruitset', 'fruitmass','seeds']
 
 def main():
+    
+  #  st.sidebar.markdown("<h2>About the app</h2>", unsafe_allow_html=True)
+  #  st.sidebar.write("""
+  #  This app will predict the crop yield of wild berries given the characteristics and the weather data for the
+  #  location of the building.
+  #  """)
+    
     with st.form('prediction_form'):
         
-        st.subheader("Enter the following details:")
-    
-        clonesize = st.slider("Days with below 20F temperature",10.0, 40.0)
-        honeybee = st.slider("Days with below 10F temperature",0.0, 18.43)
-        bumbles = st.slider("Days with above 100F temperature",0.0, 0.585)  
-        andrena = st.slider("Days with below 20F temperature",0.0, 0.75)
-        osmia = st.slider("Days with below 10F temperature",0.0, 0.75)
-        AverageOfLowerTRange = st.slider("Days with above 100F temperature",41.2, 55.9)  
-        AverageRainingDays = st.slider("Days with below 20F temperature",0.06, 0.56)
-        fruitset = st.slider("Days with below 10F temperature",0.19, 0.65)
-        fruitmass = st.slider("Days with above 100F temperature",0.31, 0.54)  
-        seeds = st.slider("Days with above 100F temperature",22.0, 46.6) 
+        st.subheader('Enter the following details:')
+        
+        clonesize = st.selectbox('The average blueberry clone size (in m2) in the field', 
+                                options=[37.5, 25.0, 12.5, 20.0, 10.0, 40.0] )
+        honeybee = st.selectbox('Honeybee density (in bees/m2/min) in the field', 
+                                options=[0.75, 0.25, 0.5, 0.0, 6.64, 18.43, 0.537] )
+        bumbles = st.selectbox('Bumblebee density (in bees/m2/min) in the field', 
+                               options=[0.25, 0.38, 0.117, 0.202, 0.0, 0.065, 0.042, 0.585, 0.293, 0.058] )
+        andrena = st.selectbox('Andrena bee density (in bees/m2/min) in the field', 
+                               options=[0.25, 0.38, 0.5, 0.63, 0.75, 0.409, 0.707, 0.0, 0.229, 0.147, 0.585, 0.234] )
+        osmia = st.selectbox('Osmia bee density (in bees/m2/min) in the field', 
+                             options=[0.25, 0.38, 0.5, 0.63, 0.75, 0.058, 0.101, 0.0, 0.033, 0.021, 0.585, 0.117] )
+        AverageOfLowerTRange = st.selectbox('The average of the lower band daily air temperature (℃)', 
+                                            options=[50.8, 55.9, 45.8, 41.2, 45.3] )
+        AverageRainingDays = st.selectbox('The average of raining days of the entire bloom season', 
+                                          options=[0.26, 0.1, 0.39, 0.56, 0.06] )
+        fruitset = st.slider('Average fruitset of the wild berry',0.19, 0.65)
+        fruitmass = st.slider('Fruit mass (kg) of the wild berry',0.31, 0.54)  
+        seeds = st.slider('Seeds of wild berry produced',22.0, 46.6) 
            
-        submit = st.button("Predict")
+        submit = st.form_submit_button('Predict')
 
     if submit:
         data = np.array([clonesize, honeybee,bumbles,andrena,osmia,AverageOfLowerTRange,AverageRainingDays,
                         fruitset,fruitmass,seeds]).reshape(1,-1)
         #st.write(data)
         pred = get_prediction(data=data, model=model)
-        st.write(f"The predicted wild berry yield is:  {pred[0]} 🫐")
+        st.write(f'The predicted wild berry yield is:  {pred[0]} 🫐')
            
 
 if __name__ == '__main__':
