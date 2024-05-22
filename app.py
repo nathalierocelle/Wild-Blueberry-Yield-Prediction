@@ -1,60 +1,39 @@
-import streamlit as st
-import pandas as pd
-import numpy as np
+from fastapi import FastAPI
+from pydantic import BaseModel
+import uvicorn
 import joblib
-from xgboost import XGBRegressor
-from prediction import get_prediction
-from PIL import Image
+import json
+import numpy as np
 
+model = joblib.load("final_model.joblib")
 
-model = joblib.load(r'final_model.joblib')
+app = FastAPI()
 
-st.set_page_config(page_icon="🫐")
-
-st.image('Banner.jpg')
-
-features = ['clonesize', 'honeybee', 'bumbles', 'andrena', 'osmia','AverageOfLowerTRange',
-            'AverageRainingDays', 'fruitset', 'fruitmass','seeds']
-
-def main():
+class Data(BaseModel):
+    clonesize : float
+    honeybee : float 
+    bumbles: float
+    andrena: float
+    osmia : float
+    AverageOfLowerTRange: float
+    AverageRainingDays: float
+    fruitset: float 
+    fruitmass: float
+    seeds: float 
     
-    st.sidebar.markdown("<h2>About the app</h2>", unsafe_allow_html=True)
-    st.sidebar.write("""
-            This app will predict the crop yield of the wild berries given various factors, 
-            including plant spatial arrangement, bee species compositions, weather conditions of the wild blueberry field.
-             """)
-    
-    with st.form('prediction_form'):
-        
-        st.subheader('Enter the following details:')
-        
-        clonesize = st.selectbox('The average blueberry clone size (in m2) in the field', 
-                                options=[37.5, 25.0, 12.5, 20.0, 10.0, 40.0] )
-        honeybee = st.selectbox('Honeybee density (in bees/m2/min) in the field', 
-                                options=[0.75, 0.25, 0.5, 0.0, 6.64, 18.43, 0.537] )
-        bumbles = st.selectbox('Bumblebee density (in bees/m2/min) in the field', 
-                               options=[0.25, 0.38, 0.117, 0.202, 0.0, 0.065, 0.042, 0.585, 0.293, 0.058] )
-        andrena = st.selectbox('Andrena bee density (in bees/m2/min) in the field', 
-                               options=[0.25, 0.38, 0.5, 0.63, 0.75, 0.409, 0.707, 0.0, 0.229, 0.147, 0.585, 0.234] )
-        osmia = st.selectbox('Osmia bee density (in bees/m2/min) in the field', 
-                             options=[0.25, 0.38, 0.5, 0.63, 0.75, 0.058, 0.101, 0.0, 0.033, 0.021, 0.585, 0.117] )
-        AverageOfLowerTRange = st.selectbox('The average of the lower band daily air temperature (℃)', 
-                                            options=[50.8, 55.9, 45.8, 41.2, 45.3] )
-        AverageRainingDays = st.selectbox('The average of raining days of the entire bloom season', 
-                                          options=[0.26, 0.1, 0.39, 0.56, 0.06] )
-        fruitset = st.slider('Average fruitset of the wild berry',0.19, 0.65)
-        fruitmass = st.slider('Fruit mass (kg) of the wild berry',0.31, 0.54)  
-        seeds = st.slider('Seeds of wild berry produced',22.0, 46.6) 
-           
-        submit = st.form_submit_button('Predict')
+    def convert_json_to_array(self):
+        return np.array([[self.clonesize, self.honeybee, self.bumbles, self.andrena, self.osmia, self.AverageOfLowerTRange,
+                          self.AverageRainingDays, self.fruitset, self.fruitmass, self.seeds]])
 
-    if submit:
-        data = np.array([clonesize, honeybee,bumbles,andrena,osmia,AverageOfLowerTRange,AverageRainingDays,
-                        fruitset,fruitmass,seeds]).reshape(1,-1)
-        #st.write(data)
-        pred = get_prediction(data=data, model=model)
-        st.write(f'The predicted wild berry yield is:  {pred[0]} 🫐')
-           
+@app.get("/")
+def home():
+    return "Wildberry Prediction API"
 
-if __name__ == '__main__':
-    main()
+@app.post("/predict")
+def predict_model(data:Data):
+    array = data.convert_json_to_array()
+    prediction = round(model.predict(array)[0],2)
+    return {"status": "success", "data": data, "prediction": prediction}
+
+if __name__ == "__main__":
+    uvicorn.run("app:app", host="0.0.0.0", port=8000, workers=2, reload=True)
